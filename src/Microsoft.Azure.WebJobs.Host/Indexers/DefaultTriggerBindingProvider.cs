@@ -4,6 +4,7 @@
 using System.Collections.Generic;
 using Microsoft.Azure.WebJobs.Host.Blobs;
 using Microsoft.Azure.WebJobs.Host.Blobs.Triggers;
+using Microsoft.Azure.WebJobs.Host.DurableTasks;
 using Microsoft.Azure.WebJobs.Host.Executors;
 using Microsoft.Azure.WebJobs.Host.Listeners;
 using Microsoft.Azure.WebJobs.Host.Queues;
@@ -40,6 +41,9 @@ namespace Microsoft.Azure.WebJobs.Host.Indexers
             {
                 innerProviders.Add(provider);
             }
+
+            // TODO: Make this a proper extension
+            innerProviders.Add(new OrchestrationTriggerAttributeBindingProvider());
 
             return new CompositeTriggerBindingProvider(innerProviders);
         }
