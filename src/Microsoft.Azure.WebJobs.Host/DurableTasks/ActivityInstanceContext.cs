@@ -2,35 +2,35 @@
 // Licensed under the MIT License. See License.txt in the project root for license information.
 
 using System;
-using System.Threading.Tasks;
 using DurableTask;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 
 namespace Microsoft.Azure.WebJobs
 {
     /// <summary>
-    /// Parameter data for orchestration bindings that can be used to schedule function-based activities.
+    /// Parameter data for activity bindings that are scheduled by their parent orchestrations.
     /// </summary>
-    public class OrchestrationInstanceContext : IOrchestrationReturnValue
+    public class ActivityInstanceContext : IActivityReturnValue
     {
         // The default JsonDataConverter for DTFx includes type information in JSON objects. This blows up when using Functions 
         // because the type information generated from C# scripts cannot be understood by DTFx. For this reason, explicitly
         // configure the JsonDataConverter with default serializer settings, which don't include CLR type information.
         private static readonly JsonDataConverter SharedJsonConverter = new JsonDataConverter(new JsonSerializerSettings());
 
-        private readonly OrchestrationContext innerContext;
+        private readonly TaskContext innerContext;
         private readonly string rawInput;
 
         private string returnValue;
 
-        internal OrchestrationInstanceContext(OrchestrationContext innerContext, string rawInput)
+        internal ActivityInstanceContext(TaskContext innerContext, string rawInput)
         {
             this.innerContext = innerContext;
             this.rawInput = rawInput;
         }
 
         /// <summary>
-        /// Gets the <see cref="OrchestrationInstance"/> associated with the currently running orchestration.
+        /// Gets the <see cref="OrchestrationInstance"/> associated with the currently running activity task.
         /// </summary>
         [CLSCompliant(false)]
         public OrchestrationInstance OrchestrationInstance
@@ -39,13 +39,13 @@ namespace Microsoft.Azure.WebJobs
         }
 
         // Intended for use by internal callers.
-        string IOrchestrationReturnValue.ReturnValue
+        string IActivityReturnValue.ReturnValue
         {
             get { return this.returnValue; }
         }
 
         // Intended for use by internal callers.
-        void IOrchestrationReturnValue.SetReturnValue(object responseValue)
+        void IActivityReturnValue.SetReturnValue(object responseValue)
         {
             string stringResponseValue = responseValue as string;
             if (stringResponseValue != null || responseValue == null)
@@ -59,7 +59,7 @@ namespace Microsoft.Azure.WebJobs
         }
 
         /// <summary>
-        /// Returns the input of the orchestration in its raw string value.
+        /// Returns the input of the task activity in its raw string value.
         /// </summary>
         public string GetInput()
         {
@@ -67,20 +67,39 @@ namespace Microsoft.Azure.WebJobs
         }
 
         /// <summary>
-        /// Gets the input of the orchestration as a deserialized value of type <typeparam name="T"/>.
+        /// Gets the input of the task activity as a deserialized value of type <typeparam name="T"/>.
         /// </summary>
         public T GetInput<T>()
         {
-            return SharedJsonConverter.Deserialize<T>(this.rawInput);
-        }
+            // Copied from DTFx Framework\TaskActivity.cs
+            T parameter = default(T);
+            JArray array = JArray.Parse(this.rawInput);
+            if (array != null)
+            {
+                int parameterCount = array.Count;
+                if (parameterCount > 1)
+                {
+                    throw new ArgumentException(
+                        "Activity implementation cannot be invoked due to more than expected input parameters.  Signature mismatch.");
+                }
 
-        /// <summary>
-        /// Schedules an activity named <paramref name="name"/> for execution.
-        /// </summary>
-        /// <typeparam name="TResult">The return type of the scheduled activity.</typeparam>
-        public Task<TResult> ScheduleActivity<TResult>(string name, string version, params object[] parameters)
-        {
-            return this.innerContext.ScheduleTask<TResult>(name, version, parameters);
+                if (parameterCount == 1)
+                {
+                    JToken token = array[0];
+                    var value = token as JValue;
+                    if (value != null)
+                    {
+                        parameter = value.ToObject<T>();
+                    }
+                    else
+                    {
+                        string serializedValue = token.ToString();
+                        parameter = SharedJsonConverter.Deserialize<T>(serializedValue);
+                    }
+                }
+            }
+
+            return parameter;
         }
     }
 }

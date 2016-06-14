@@ -76,7 +76,7 @@ namespace Microsoft.Azure.WebJobs.Host.DurableTasks
                 context.Executor);
             durableTaskContext.Orchestrations.Add(orchestrationCreator);
 
-            var listener = new DurableTaskListener(durableTaskContext);
+            DurableTaskListener listener = DurableTaskListener.GetOrAddSharedListener(durableTaskContext);
             return Task.FromResult<IListener>(listener);
         }
 

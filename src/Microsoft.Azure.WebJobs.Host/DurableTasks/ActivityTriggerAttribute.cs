@@ -11,35 +11,35 @@ namespace Microsoft.Azure.WebJobs
     /// run when an orchestration is resumed.
     /// </summary>
     [AttributeUsage(AttributeTargets.Parameter)]
-    [DebuggerDisplay("{Orchestration,nq}")]
-    public sealed class OrchestrationTriggerAttribute : Attribute
+    [DebuggerDisplay("{TaskHub,nq}")]
+    public sealed class ActivityTriggerAttribute : Attribute
     {
         private readonly string taskHub;
-        private readonly string orchestration;
+        private readonly string activity;
         private readonly string version;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="OrchestrationTriggerAttribute"/> class.
+        /// Initializes a new instance of the <see cref="ActivityTriggerAttribute"/> class.
         /// </summary>
         /// <param name="taskHub">
-        /// The name of the task hub in which the orchestration is running.
+        /// The name of the task hub in which the activity is running.
         /// </param>
-        /// <param name="orchestration">The name of the orchestration to trigger.</param>
-        /// <param name="version">The version of the orchestration to trigger.</param>
-        public OrchestrationTriggerAttribute(string taskHub, string orchestration, string version = "")
+        /// <param name="activity">The name of the activity trigger.</param>
+        /// <param name="version">The version of the activity trigger.</param>
+        public ActivityTriggerAttribute(string taskHub, string activity, string version = "")
         {
             if (string.IsNullOrEmpty(taskHub))
             {
                 throw new ArgumentNullException("taskHub");
             }
 
-            if (string.IsNullOrEmpty(orchestration))
+            if (string.IsNullOrEmpty(activity))
             {
-                throw new ArgumentNullException("orchestration");
+                throw new ArgumentNullException("activity");
             }
 
             this.taskHub = taskHub;
-            this.orchestration = orchestration;
+            this.activity = activity;
             this.version = version;
         }
 
@@ -52,15 +52,15 @@ namespace Microsoft.Azure.WebJobs
         }
 
         /// <summary>
-        /// Gets the name of the orchestration.
+        /// Gets the name of the activity.
         /// </summary>
-        public string Orchestration
+        public string Activity
         {
-            get { return this.orchestration; }
+            get { return this.activity; }
         }
 
         /// <summary>
-        /// Gets the version of the orchestration.
+        /// Gets the version of the activity.
         /// </summary>
         public string Version
         {

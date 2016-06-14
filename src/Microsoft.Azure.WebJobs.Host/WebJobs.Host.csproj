@@ -48,8 +48,9 @@
     <AssemblyOriginatorKeyFile>..\Common\PublicKey.snk</AssemblyOriginatorKeyFile>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="DurableTask">
-      <HintPath>..\..\..\durabletask-demo\bin\Debug\DurableTask.dll</HintPath>
+    <Reference Include="DurableTask, Version=1.0.0.8, Culture=neutral, PublicKeyToken=d53979610a6e89dd, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\durabletask-demo\Dependencies\DurableTask.dll</HintPath>
     </Reference>
     <Reference Include="Microsoft.Azure.KeyVault.Core, Version=1.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <HintPath>..\..\packages\Microsoft.Azure.KeyVault.Core.1.0.0\lib\net40\Microsoft.Azure.KeyVault.Core.dll</HintPath>
@@ -379,9 +380,13 @@
     <Compile Include="Bindings\BindingProviders\ValidatingWrapperBindingProvider.cs" />
     <Compile Include="Bindings\DefaultAttributeInvokerDescriptor.cs" />
     <Compile Include="Bindings\IArgumentBindingProvider.cs" />
+    <Compile Include="DurableTasks\ActivityTriggerAttribute.cs" />
+    <Compile Include="DurableTasks\ActivityTriggerAttributeBindingProvider.cs" />
     <Compile Include="DurableTasks\DurableTaskListener.cs" />
     <Compile Include="DurableTasks\DurableTaskWorkerContext.cs" />
+    <Compile Include="DurableTasks\IActivityReturnValue.cs" />
     <Compile Include="DurableTasks\IOrchestrationReturnValue.cs" />
+    <Compile Include="DurableTasks\ActivityInstanceContext.cs" />
     <Compile Include="DurableTasks\OrchestrationInstanceContext.cs" />
     <Compile Include="DurableTasks\OrchestrationTriggerAttribute.cs" />
     <Compile Include="DurableTasks\OrchestrationTriggerAttributeBindingProvider.cs" />

@@ -44,6 +44,7 @@ namespace Microsoft.Azure.WebJobs.Host.Indexers
 
             // TODO: Make this a proper extension
             innerProviders.Add(new OrchestrationTriggerAttributeBindingProvider());
+            innerProviders.Add(new ActivityTriggerAttributeBindingProvider());
 
             return new CompositeTriggerBindingProvider(innerProviders);
         }

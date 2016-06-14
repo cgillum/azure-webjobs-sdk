@@ -12,6 +12,7 @@ namespace Microsoft.Azure.WebJobs.Host.DurableTasks
         private readonly string serviceBusConnectionString;
         private readonly string tableStorageConnectionString;
         private readonly List<ObjectCreator<TaskOrchestration>> orchestrations;
+        private readonly List<ObjectCreator<TaskActivity>> activities;
 
         public DurableTaskWorkerContext(
             string hubName,
@@ -22,6 +23,7 @@ namespace Microsoft.Azure.WebJobs.Host.DurableTasks
             this.serviceBusConnectionString = serviceBusConnectionString;
             this.tableStorageConnectionString = tableStorageConnectionString;
             this.orchestrations = new List<ObjectCreator<TaskOrchestration>>();
+            this.activities = new List<ObjectCreator<TaskActivity>>();
         }
 
         public string HubName
@@ -42,6 +44,11 @@ namespace Microsoft.Azure.WebJobs.Host.DurableTasks
         public IList<ObjectCreator<TaskOrchestration>> Orchestrations
         {
             get { return this.orchestrations; }
+        }
+
+        public IList<ObjectCreator<TaskActivity>> Activities
+        {
+            get { return this.activities; }
         }
     }
 }
