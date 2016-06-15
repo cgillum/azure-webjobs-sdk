@@ -390,7 +390,6 @@
     <Compile Include="DurableTasks\OrchestrationInstanceContext.cs" />
     <Compile Include="DurableTasks\OrchestrationTriggerAttribute.cs" />
     <Compile Include="DurableTasks\OrchestrationTriggerAttributeBindingProvider.cs" />
-    <Compile Include="DurableTasks\OrchestrationTriggerBinding.cs" />
     <Compile Include="Queues\Bindings\QueueBindingProvider.cs" />
     <Compile Include="Bindings\Runtime\IBinderEx.cs" />
     <Compile Include="Bindings\Runtime\RuntimeBindingContext.cs" />
