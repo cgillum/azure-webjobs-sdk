@@ -2,6 +2,8 @@
 // Licensed under the MIT License. See License.txt in the project root for license information.
 
 using System;
+using System.Collections.Generic;
+using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
 using DurableTask;
@@ -18,6 +20,9 @@ namespace Microsoft.Azure.WebJobs
         // because the type information generated from C# scripts cannot be understood by DTFx. For this reason, explicitly
         // configure the JsonDataConverter with default serializer settings, which don't include CLR type information.
         private static readonly JsonDataConverter SharedJsonConverter = new JsonDataConverter(new JsonSerializerSettings());
+
+        private readonly Dictionary<string, object> pendingExternalEvents = 
+            new Dictionary<string, object>(StringComparer.OrdinalIgnoreCase);
 
         private readonly OrchestrationContext innerContext;
         private readonly string rawInput;
@@ -99,10 +104,48 @@ namespace Microsoft.Azure.WebJobs
         /// <param name="fireAt">The time at which the timer should fire.</param>
         /// <param name="state">Any state to be preserved by the timer.</param>
         /// <param name="cancelToken"><see cref="CancellationToken"/> to be used for cancelling the timer.</param>
-        /// <returns></returns>
+        /// <returns>Returns a task associated with the created timer.</returns>
         public Task<T> CreateTimer<T>(DateTime fireAt, T state, CancellationToken cancelToken)
         {
             return this.innerContext.CreateTimer(fireAt, state, cancelToken);
+        }
+
+        /// <summary>
+        /// Waits asynchronously for an event to be raised with name <paramref name="name"/> and returns the event data.
+        /// </summary>
+        /// <param name="name">The name of the event to wait for.</param>
+        /// <returns>Returns the data associated with the external event.</returns>
+        public Task<T> WaitForExternalEvent<T>(string name)
+        {
+            lock (this.pendingExternalEvents)
+            {
+                object tcsRef;
+                TaskCompletionSource<T> tcs;
+                if (!this.pendingExternalEvents.TryGetValue(name, out tcsRef) || (tcs = tcsRef as TaskCompletionSource<T>) == null)
+                {
+                    tcs = new TaskCompletionSource<T>();
+                    this.pendingExternalEvents[name] = tcs;
+                }
+
+                return tcs.Task;
+            }
+        }
+
+        internal void RaiseEvent(string name, string input)
+        {
+            lock (this.pendingExternalEvents)
+            {
+                object tcs;
+                if (this.pendingExternalEvents.TryGetValue(name, out tcs))
+                {
+                    Type tcsType = tcs.GetType();
+                    Type genericTypeArgument = tcsType.GetGenericArguments()[0];
+
+                    object deserializedObject = SharedJsonConverter.Deserialize(input, genericTypeArgument);
+                    MethodInfo trySetResult = tcsType.GetMethod("TrySetResult");
+                    trySetResult.Invoke(tcs, new[] { deserializedObject });
+                }
+            }
         }
     }
 }

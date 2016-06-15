@@ -147,6 +147,8 @@ namespace Microsoft.Azure.WebJobs.Host.DurableTasks
                 {
                     private readonly ITriggeredFunctionExecutor executor;
 
+                    private OrchestrationInstanceContext contextWrapper;
+
                     public FunctionShimTaskOrchestration(ITriggeredFunctionExecutor executor)
                     {
                         this.executor = executor;
@@ -154,8 +156,8 @@ namespace Microsoft.Azure.WebJobs.Host.DurableTasks
 
                     public override async Task<string> Execute(OrchestrationContext context, string rawInput)
                     {
-                        var contextWrapper = new OrchestrationInstanceContext(context, rawInput);
-                        var triggerInput = new TriggeredFunctionData { TriggerValue = contextWrapper };
+                        this.contextWrapper = new OrchestrationInstanceContext(context, rawInput);
+                        var triggerInput = new TriggeredFunctionData { TriggerValue = this.contextWrapper };
 
                         FunctionResult result = await this.executor.TryExecuteAsync(triggerInput, CancellationToken.None);
                         if (!result.Succeeded && result.Exception != null)
@@ -170,7 +172,7 @@ namespace Microsoft.Azure.WebJobs.Host.DurableTasks
 
                     public override void RaiseEvent(OrchestrationContext context, string name, string input)
                     {
-                        // TODO, cgillum: Figure out how RaiseEvent maps to functions
+                        this.contextWrapper.RaiseEvent(name, input);
                     }
 
                     public override string GetStatus()
