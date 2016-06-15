@@ -21,6 +21,8 @@ namespace Microsoft.Azure.WebJobs.Host.Loggers
         private IFunctionOutputLogger _functionOutputLogger;
         private TraceWriter _trace;
 
+        private bool _disableDashboardLogging = true;
+
         public DefaultLoggerProvider(IStorageAccountProvider storageAccountProvider, TraceWriter trace)
         {
             if (storageAccountProvider == null)
@@ -64,7 +66,7 @@ namespace Microsoft.Azure.WebJobs.Host.Loggers
             IStorageAccount dashboardAccount = await _storageAccountProvider.GetDashboardAccountAsync(cancellationToken);
             IFunctionInstanceLogger traceWriterFunctionLogger = new TraceWriterFunctionInstanceLogger(_trace);
 
-            if (dashboardAccount != null)
+            if (dashboardAccount != null && !_disableDashboardLogging)
             {
                 // Create logging against a live Azure account.
                 IStorageBlobClient dashboardBlobClient = dashboardAccount.CreateBlobClient();
