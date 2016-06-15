@@ -2,6 +2,7 @@
 // Licensed under the MIT License. See License.txt in the project root for license information.
 
 using System;
+using System.Threading;
 using System.Threading.Tasks;
 using DurableTask;
 using Newtonsoft.Json;
@@ -36,6 +37,14 @@ namespace Microsoft.Azure.WebJobs
         public OrchestrationInstance OrchestrationInstance
         {
             get { return this.innerContext.OrchestrationInstance; }
+        }
+
+        /// <summary>
+        /// Gets the "current" <see cref="DateTime"/> in a way that is safe for use by orchestrations.
+        /// </summary>
+        public DateTime CurrentUtcDateTime
+        {
+            get { return this.innerContext.CurrentUtcDateTime; }
         }
 
         // Intended for use by internal callers.
@@ -81,6 +90,19 @@ namespace Microsoft.Azure.WebJobs
         public Task<TResult> ScheduleActivity<TResult>(string name, string version, params object[] parameters)
         {
             return this.innerContext.ScheduleTask<TResult>(name, version, parameters);
+        }
+
+        /// <summary>
+        /// Creates a durable timer which will triggered at the specified time.
+        /// </summary>
+        /// <typeparam name="T">The type of <paramref name="state"/>.</typeparam>
+        /// <param name="fireAt">The time at which the timer should fire.</param>
+        /// <param name="state">Any state to be preserved by the timer.</param>
+        /// <param name="cancelToken"><see cref="CancellationToken"/> to be used for cancelling the timer.</param>
+        /// <returns></returns>
+        public Task<T> CreateTimer<T>(DateTime fireAt, T state, CancellationToken cancelToken)
+        {
+            return this.innerContext.CreateTimer(fireAt, state, cancelToken);
         }
     }
 }
