@@ -9,6 +9,7 @@ using Microsoft.Azure.WebJobs.Host.Bindings.Runtime;
 using Microsoft.Azure.WebJobs.Host.Bindings.StorageAccount;
 using Microsoft.Azure.WebJobs.Host.Blobs;
 using Microsoft.Azure.WebJobs.Host.Blobs.Bindings;
+using Microsoft.Azure.WebJobs.Host.DurableTasks;
 using Microsoft.Azure.WebJobs.Host.Executors;
 using Microsoft.Azure.WebJobs.Host.Queues;
 using Microsoft.Azure.WebJobs.Host.Queues.Bindings;
@@ -47,6 +48,8 @@ namespace Microsoft.Azure.WebJobs.Host.Indexers
             // The TraceWriter binder handles all remaining TraceWriter/TextWriter parameters. It must come after the
             // Blob binding provider; otherwise bindings like Do([Blob("a/b")] TextWriter blob) wouldn't work.
             innerProviders.Add(new TraceWriterBindingProvider());
+
+            innerProviders.Add(new OrchestrationClientBindingProvider());
 
             ContextAccessor<IBindingProvider> bindingProviderAccessor = new ContextAccessor<IBindingProvider>();
             innerProviders.Add(new RuntimeBindingProvider(bindingProviderAccessor));

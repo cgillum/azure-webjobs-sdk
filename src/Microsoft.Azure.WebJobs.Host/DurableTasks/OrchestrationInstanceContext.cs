@@ -19,7 +19,7 @@ namespace Microsoft.Azure.WebJobs
         // The default JsonDataConverter for DTFx includes type information in JSON objects. This blows up when using Functions 
         // because the type information generated from C# scripts cannot be understood by DTFx. For this reason, explicitly
         // configure the JsonDataConverter with default serializer settings, which don't include CLR type information.
-        private static readonly JsonDataConverter SharedJsonConverter = new JsonDataConverter(new JsonSerializerSettings());
+        internal static readonly JsonDataConverter SharedJsonConverter = new JsonDataConverter(new JsonSerializerSettings());
 
         private readonly Dictionary<string, object> pendingExternalEvents = 
             new Dictionary<string, object>(StringComparer.OrdinalIgnoreCase);
