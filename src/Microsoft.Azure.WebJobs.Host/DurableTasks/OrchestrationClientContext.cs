@@ -42,6 +42,19 @@ namespace Microsoft.Azure.WebJobs
         }
 
         /// <summary>
+        /// Creates a new orchestration instance of the specified name, version, and instance ID.
+        /// </summary>
+        /// <param name="name">The name of the orchestration to create.</param>
+        /// <param name="version">The version of the named orchestration to create.</param>
+        /// <param name="instanceId">The unique instance ID to use for the created orchestration.</param>
+        /// <param name="input">Input data for the created orchestration.</param>
+        public async Task<string> CreateOrchestrationInstanceAsync(string name, string version, string instanceId, object input)
+        {
+            OrchestrationInstance instance = await this.client.CreateOrchestrationInstanceAsync(name, version, instanceId, input);
+            return instance.InstanceId;
+        }
+
+        /// <summary>
         /// Sends an event to a running orchestration instance.
         /// </summary>
         /// <param name="instanceId">The ID of the orchestration instance to receive the event.</param>
